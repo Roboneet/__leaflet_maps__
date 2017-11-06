@@ -3,9 +3,9 @@
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title></title>
-
-   <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.41.0/mapbox-gl.js'></script>
-	<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.41.0/mapbox-gl.css' rel='stylesheet' />
+	 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+   integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+   crossorigin=""/>
    <style type="text/css">
    *{
 	   	margin: 0 ;
@@ -121,8 +121,10 @@
 	 </div>
 	 <div class="map" id="__map__"></div>
 	</div>
-
- 
+	<!-- Make sure you put this AFTER Leaflet's CSS -->
+ 	<script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+   integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+   crossorigin=""></script>
 	<script type="text/javascript">
 		(function(){
 			var mapbox_access_token = "pk.eyJ1IjoibWF5YW5rLXRhcHJvdXRlIiwiYSI6ImNqOW9lMW02bjFhc3Iyd240ZGFiemxtcW8ifQ.7ukZTek-mB-_rMLNn5rcZw";
@@ -132,17 +134,18 @@
 
 			function initMap(position){
 				console.log(position);
-				var latlng = new mapboxgl.LngLat(position.coords.longitude, position.coords.latitude);
+				var latlng = [position.coords.latitude, position.coords.longitude];
+				var mymap = L.map('__map__').setView(latlng, 20);
 
-				mapboxgl.accessToken = mapbox_access_token;
-				var map = new mapboxgl.Map({
-				    container: '__map__',
-				    center: latlng,
-				    zoom: 15,
-				    hash: true,
-				    style: 'mapbox://styles/mapbox/light-v9'
-				});
-				console.log(map);
+				L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + mapbox_access_token, {
+				    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+				    maxZoom: 18,
+				    id: 'mapbox.streets',
+				    accessToken: mapbox_access_token,
+				}).addTo(mymap);
+
+				var marker = L.marker(latlng).addTo(mymap);
+				marker.bindPopup("You are here").openPopup();
 			}
 		})();
 	</script>
