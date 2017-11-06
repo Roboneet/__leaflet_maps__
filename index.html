@@ -6,6 +6,7 @@
 
    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.41.0/mapbox-gl.js'></script>
 	<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.41.0/mapbox-gl.css' rel='stylesheet' />
+   
    <style type="text/css">
    *{
 	   	margin: 0 ;
@@ -125,13 +126,52 @@
    			min-width: 200px;
    		}
    	}
+
+      .top_bar{
+         position: absolute;
+         top: 0;
+         left: 0;
+         width: 100vw;
+      }
+
+      .top_bar section{
+         display: flex;
+         flex-direction: row-reverse;
+      }
+      .top_bar section .form .field{
+         margin: 15px;
+         background: rgba(255,255,255,.6);
+         
+      }
+      
+      .top_bar .field input::-webkit-input-placeholder{
+         color: #777;
+      }
+
+      .top_bar .field input{
+         font-size: 16px;
+         color: #444;
+      }
+
+      .marker{
+         width : 50px;
+         height: 50px;
+         /*border: 1px solid #000;*/
+         background: #4b87bf;
+         line-height: 50px;
+         text-align:center;
+         border-radius: 50%;
+         color: #fff;
+      }
    </style>
 </head>
 <body>
 	<div class="main_wrapper">
-	 <div class="side_bar">
-	 	<section>
-	 		<h1 class="heading">Find your way</h1>
+	 <div class="map" id="__map__"></div>
+    <!-- <div class="top_bar">
+	  
+    	<section>
+	 		
 	 		<div class="form">
 	 			<div class="field">
 	 				<span>	&#127968;</span>
@@ -141,43 +181,60 @@
 	 				<span>&#128188;</span>
 	 				<input type="text" placeholder="End position">
 	 			</div>
-	 			<div class="submit">
-	 				<button >Let's go</button>
-	 			</div>
+	 		
 	 		</div>
 	 	</section>
-	 </div>
-	 <div class="map" id="__map__"></div>
+	 </div> -->
+	 
 	</div>
 
- 
+ <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v3.1.1/mapbox-gl-directions.js'></script>
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v3.1.1/mapbox-gl-directions.css' type='text/css' />
+
+
 	<script type="text/javascript">
 		(function(){
 			var mapbox_access_token = "pk.eyJ1IjoibWF5YW5rLXRhcHJvdXRlIiwiYSI6ImNqOW9lMW02bjFhc3Iyd240ZGFiemxtcW8ifQ.7ukZTek-mB-_rMLNn5rcZw";
-			if(navigator.geolocation){
+         var base_url = "https://api.mapbox.com/";
+			var map;
+
+         if(navigator.geolocation){
 				navigator.geolocation.getCurrentPosition(initMap);
 			}
-
+         
 			function initMap(position){
 				console.log(position);
 				var lnglat = new mapboxgl.LngLat(position.coords.longitude, position.coords.latitude);
-
 				mapboxgl.accessToken = mapbox_access_token;
-				var map = new mapboxgl.Map({
+				map = new mapboxgl.Map({
 				    container: '__map__',
 				    center: lnglat,
-				    zoom: 8,
+				    zoom: 11,
 				    pitch: 0,
 				    bearing: 0,
 				    hash: true,
-				    style: 'mapbox://styles/mapbox/bright-v9'
+				    style: 'mapbox://styles/mapbox/streets-v9'
 				});
-				// map.pitchWithRotate = true;
-				console.log(map);
-				var marker = new mapboxgl.Marker()
-				  .setLngLat(lnglat)
-				  .addTo(map);
+            map.addControl(new MapboxDirections({
+                accessToken: mapboxgl.accessToken
+            }), 'top-left');
 			}
+
+         function setMarker(lnglat, text=null){
+            var el = document.createElement('div');
+            el.className = "marker";
+            if( text != null)
+               el.innerText = text;
+            var marker = new mapboxgl.Marker(el)
+              .setLngLat(lnglat)
+              .addTo(map);
+         }
+
+         function getDirection(lnglat_a, lnglat_b){
+            let url = base_url + 'directions/v5/mapbox/driving/'+ lnglat_a.toArray().join(',') + ";" + lnglat_b.toArray().join(',') +'?geometries=geojson&access_token=' + mapbox_access_token;
+            var xhr = new XMLHttpRequest();
+         }
+
 		})();
 	</script>
 </body>
