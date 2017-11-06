@@ -10,8 +10,13 @@
    *{
 	   	margin: 0 ;
 	   	padding: 0;
-	   	font: 20px/22px arial, verdana;
+	   	font: 18px/22px arial, verdana;
 	   	box-sizing: border-box;
+	   	transition: all .5s linear;
+   }
+   body{
+   	background: #eee;
+   	
    }
    	.main_wrapper{
    		width: 100vw;
@@ -25,6 +30,8 @@
    		display: flex;
    		justify-content: center;
    		padding: 30px 0;
+   		background: rgba(27,25,24,0.8);
+   		color: #eee;
    	}
    	.map{
    		flex: 2;
@@ -59,31 +66,50 @@
    	}
 
    	.heading{
-   		font-size: 33px;
+   		font-size: 25px;
    		line-height: 50px;
    	}
 
    	.field{
    		margin: 30px 0;
+   		padding: 5px 10px;
+   		border: 1px solid #aaa;
+   		border-radius: 3px;
+   		color: #eee;
    	}
    	.field input{
    		line-height: 30px;
    		border-radius: 6px;
-   		padding: 10px;
+   		margin: 0 20px;
    		box-shadow: none;
    		border: none;
-   		background: #eee;
-   		min-width: 300px;
+   		background: transparent;
+   		min-width: 200px;
+   		color: #eee;
+   	}
+   	.field input::-webkit-input-placeholder {
+   		color: #eaeaea;
+   	}
+   	.field input:focus, .submit button:focus{
+   		border: none;
+   		outline: none;
    	}
 
    	.submit button{
-   		padding: 20px;
-   		font-size: 25px;
+   		padding: 10px;
+   		font-size: 20px;
    		border-radius: 3px;
    		border: none;
    		background: #4b87bf;
    		color: #fff;
    		width: 150px;
+   		box-shadow: 0 5px 0 #80acd4;
+   		transition-timing-function: cubic-bezier(0.43, 0.55, 0.07, 1.05);
+   	}
+
+   	.submit button:active{
+   		transform: translateY(2px);	
+   		box-shadow: 0 3px 0 #80acd4;
    	}
 
    	@media only screen and (min-width: 768px){
@@ -96,7 +122,7 @@
    		}
 
    		.field input{
-   			min-width: 450px;
+   			min-width: 200px;
    		}
    	}
    </style>
@@ -108,9 +134,11 @@
 	 		<h1 class="heading">Find your way</h1>
 	 		<div class="form">
 	 			<div class="field">
+	 				<span>	&#127968;</span>
 	 				<input type="text" placeholder="Start position">
 	 			</div>
 	 			<div class="field">
+	 				<span>&#128188;</span>
 	 				<input type="text" placeholder="End position">
 	 			</div>
 	 			<div class="submit">
@@ -132,17 +160,23 @@
 
 			function initMap(position){
 				console.log(position);
-				var latlng = new mapboxgl.LngLat(position.coords.longitude, position.coords.latitude);
+				var lnglat = new mapboxgl.LngLat(position.coords.longitude, position.coords.latitude);
 
 				mapboxgl.accessToken = mapbox_access_token;
 				var map = new mapboxgl.Map({
 				    container: '__map__',
-				    center: latlng,
-				    zoom: 15,
+				    center: lnglat,
+				    zoom: 8,
+				    pitch: 0,
+				    bearing: 0,
 				    hash: true,
-				    style: 'mapbox://styles/mapbox/light-v9'
+				    style: 'mapbox://styles/mapbox/bright-v9'
 				});
+				// map.pitchWithRotate = true;
 				console.log(map);
+				var marker = new mapboxgl.Marker()
+				  .setLngLat(lnglat)
+				  .addTo(map);
 			}
 		})();
 	</script>
