@@ -190,7 +190,9 @@
 
  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v3.1.1/mapbox-gl-directions.js'></script>
 <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v3.1.1/mapbox-gl-directions.css' type='text/css' />
-
+   <script>
+      var lnglatdata = [[77.6521,12.9913], [77.6267,12.9764]].map(v => new mapboxgl.LngLat(v[0],v[1]));
+   </script>
 
 	<script type="text/javascript">
 		(function(){
@@ -208,16 +210,19 @@
 				mapboxgl.accessToken = mapbox_access_token;
 				map = new mapboxgl.Map({
 				    container: '__map__',
-				    center: lnglat,
-				    zoom: 11,
+				    center: lnglatdata[0],
+				    zoom: 13,
 				    pitch: 0,
 				    bearing: 0,
 				    hash: true,
 				    style: 'mapbox://styles/mapbox/streets-v9'
 				});
+            console.log(map);
             map.addControl(new MapboxDirections({
                 accessToken: mapboxgl.accessToken
             }), 'top-left');
+
+            getDirection(lnglatdata[0], lnglatdata[1]);
 			}
 
          function setMarker(lnglat, text=null){
@@ -232,7 +237,127 @@
 
          function getDirection(lnglat_a, lnglat_b){
             let url = base_url + 'directions/v5/mapbox/driving/'+ lnglat_a.toArray().join(',') + ";" + lnglat_b.toArray().join(',') +'?geometries=geojson&access_token=' + mapbox_access_token;
-            var xhr = new XMLHttpRequest();
+            var request = new XMLHttpRequest();
+            request.open("GET", url, true)
+            request.send();
+
+            request.onreadystatechange = function() {
+                 if (this.readyState == 4 && this.status == 200) {
+                     var route  =  JSON.parse(this.response).routes[0].geometry;
+                     console.log(route);
+
+                     // add route
+                     map.addLayer({
+                       'id': 'route-line',
+                       'type': 'line',
+                       'source': {
+                          type: 'geojson',
+                          data: {
+                            type: 'Feature',
+                            geometry: route
+                          }
+                        },
+                       'layout': {
+                         'line-cap': 'round',
+                         'line-join': 'round'
+                       },
+                       'paint': {
+                         'line-color': '#3bb2d0',
+                         'line-width': 4
+                       },
+                       
+                      });
+
+                     // add 
+                    map.addLayer({
+                       id: 'origin-point',
+                       type: 'circle',
+                       source: {
+                         type: 'geojson',
+                         data: {
+                           type: 'Feature',
+                           geometry: {
+                             type: 'Point',
+                             coordinates: lnglatdata[0].toArray()
+                           }
+                         }
+                       },
+                       'paint': {
+                         'circle-radius': 18,
+                         'circle-color': '#3b72d0'
+                       },
+                       
+                     });
+
+                     map.addLayer({
+                        
+                          'id': 'origin-label',
+                          'type': 'symbol',
+                          'source': {
+                            type: 'geojson',
+                            data: {
+                              type: 'Feature',
+                              geometry: {
+                                type: 'Point',
+                                coordinates: lnglatdata[0].toArray()
+                              }
+                            }
+                          },
+                          'layout': {
+                            'text-field': 'X',
+                            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                            'text-size': 12
+                          },
+                          'paint': {
+                            'text-color': '#fff'
+                          },
+                          
+                        
+                     })
+                     map.addLayer({
+                       'id': 'destination-point',
+                       'type': 'circle',
+                       'source': {
+                            type: 'geojson',
+                            data: {
+                              type: 'Feature',
+                              geometry: {
+                                type: 'Point',
+                                coordinates: lnglatdata[1].toArray()
+                              }
+                            }
+                          },
+                       'paint': {
+                         'circle-radius': 18,
+                         'circle-color': '#8a3bc9'
+                       },
+                       
+                     });
+                     map.addLayer({
+                       'id': 'destination-label',
+                       'type': 'symbol',
+                       'source': {
+                            type: 'geojson',
+                            data: {
+                              type: 'Feature',
+                              geometry: {
+                                type: 'Point',
+                                coordinates: lnglatdata[1].toArray()
+                              }
+                            }
+                          },
+                       'layout': {
+                         'text-field': 'Y',
+                         'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                         'text-size': 12
+                       },
+                       'paint': {
+                         'text-color': '#fff'
+                       },
+                       
+                     })
+                }
+             };
          }
 
 		})();
